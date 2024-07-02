@@ -160,3 +160,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+person_yolov8m-seg.pt

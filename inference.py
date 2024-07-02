@@ -135,10 +135,11 @@ class InfEngine:
             batch_data = to_gpu(batch_data, self.device)
             val_results = self.model.forward_inference(**batch_data)
             result_img = val_results['gen_sr'].clamp(0, 1)
-            _mark_patch = result_img[..., -self._water_mark.shape[-2]:, -self._water_mark.shape[-1]:]
-            _mark_patch[self._water_mark_alpha>0.5] = _mark_patch[self._water_mark_alpha>0.5] * 0.5 + \
-                                                      self._water_mark[self._water_mark_alpha>0.5] * 0.5
-            result_img[..., -self._water_mark.shape[-2]:, -self._water_mark.shape[-1]:] = _mark_patch
+            # _mark_patch = result_img[..., -self._water_mark.shape[-2]:, -self._water_mark.shape[-1]:]
+            # _mark_patch[self._water_mark_alpha>0.5] = _mark_patch[self._water_mark_alpha>0.5] * 0.5 + \
+            #                                           self._water_mark[self._water_mark_alpha>0.5] * 0.5
+            print("result_img", result_img.shape)
+            # result_img[..., -self._water_mark.shape[-2]:, -self._water_mark.shape[-1]:] = _mark_patch
             if show_driver:
                 if hasattr(self, '_d_images'):
                     d_images = self._d_images[f_idx:f_idx+1]
@@ -156,9 +157,11 @@ class InfEngine:
                     d_alphas[d_alphas <= 0.1] = 0.0
                     d_images = d_images * d_alphas / 255.0
                 of_images = self.merge_multiple_images(of_image, (512, 512))
-                img_list = [
-                    of_images, d_images, result_img, vis_depth(val_results['depth'])
-                ]
+                # img_list = [
+                #     of_images, d_images, result_img, vis_depth(val_results['depth'])
+                # ]
+                # img_list = [of_images, d_images, result_img]
+                img_list = [result_img]
             else:
                 img_list = [result_img, vis_depth(val_results['depth'])]
             img_list = [self.resize(i, (512, 512)) for i in img_list]
@@ -191,12 +194,13 @@ class InfEngine:
             _mark_patch = result_img[..., -self._water_mark.shape[-2]:, -self._water_mark.shape[-1]:]
             _mark_patch[self._water_mark_alpha>0.5] = _mark_patch[self._water_mark_alpha>0.5] * 0.5 + \
                                                       self._water_mark[self._water_mark_alpha>0.5] * 0.5
-            result_img[..., -self._water_mark.shape[-2]:, -self._water_mark.shape[-1]:] = _mark_patch
+            # result_img[..., -self._water_mark.shape[-2]:, -self._water_mark.shape[-1]:] = _mark_patch
+            print(result_img.shape)
             if 'd_images' in batch_data.keys():
                 img_list = [of_image[:, 0], batch_data['d_images'], result_img, vis_depth(val_results['depth'])]
             else:
                 img_list = [of_image[:, 0], result_img, vis_depth(val_results['depth'])]
-            img_list = [self.resize(i, (512, 512)) for i in img_list]
+            img_list = [self.resize(i, (1024, 1024)) for i in img_list]
             grid_image = torch.cat(img_list)
             grid_image = torchvision.utils.make_grid(grid_image, nrow=grid_image.shape[0], padding=0, pad_value=0)[None].cpu()
             results.append(grid_image)
@@ -237,7 +241,6 @@ class InfEngine:
             input_feature_image = torch.stack(input_feature_image, dim=0)
         input_feature_image = torchvision.transforms.functional.resize(input_feature_image, tgt_size, antialias=True)
         return input_feature_image
-
 
 if __name__ == "__main__":
     # build args
