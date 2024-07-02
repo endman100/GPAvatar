@@ -2,7 +2,6 @@
 **/*.pkl
 **/*.pth
 **/*.ckpt
-**/*.onnx
 **/*.tar
 **/*.txt
 **/*.obj
@@ -26,6 +25,7 @@
 **/outputs
 **/results
 **/examples
+**/resources
 **/drivers
 **/backup
 **/Backup
@@ -160,5 +160,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-person_yolov8m-seg.pt
-*.sh
